@@ -285,7 +285,7 @@ local function processKey(key)
 		saveKey(key)
 
 		loadstring(game:HttpGet(
-		"https://raw.githubusercontent.com/doanhvu339-ux/viphub/refs/heads/main/Vippro"
+		"https://raw.githubusercontent.com/bobaconhub-creator/Main/refs/heads/main/hayscript"
 		))()
 
 		gui:Destroy()
