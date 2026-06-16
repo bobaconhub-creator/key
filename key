@@ -3,7 +3,7 @@ pcall(function()
 	loadstring(game:HttpGet(
 	"https://raw.githubusercontent.com/doanhvu339-ux/Scriptkey/refs/heads/main/Kick"
 	))()
-end)
+end) sao xác nhận key ròi mà menu key ko tắt
 
 -------------------------------------------------
 -- SERVICES
@@ -25,6 +25,30 @@ local DEPUTY_LIST = {
 	["Yg242"] = true,
 	["tranhu001"] = true
 }
+
+-------------------------------------------------
+-- 📁 FILE SYSTEM
+-------------------------------------------------
+local KEY_FILE = "bacon_key.txt"
+local WHITELIST_FILE = "bacon_whitelist.txt"
+
+local function saveData(file, data)
+	pcall(function()
+		if writefile then
+			writefile(file, data)
+		end
+	end)
+end
+
+local function loadData(file)
+	local saved
+	pcall(function()
+		if readfile and isfile and isfile(file) then
+			saved = readfile(file)
+		end
+	end)
+	return saved
+end
 
 -------------------------------------------------
 -- 👑 ROLE TAG
@@ -87,29 +111,6 @@ end
 Players.PlayerAdded:Connect(setupRole)
 
 -------------------------------------------------
--- 🔑 KEY SAVE / LOAD
--------------------------------------------------
-local KEY_FILE = "bacon_key.txt"
-
-local function saveKey(key)
-	pcall(function()
-		if writefile then
-			writefile(KEY_FILE,key)
-		end
-	end)
-end
-
-local function loadKey()
-	local saved
-	pcall(function()
-		if readfile and isfile and isfile(KEY_FILE) then
-			saved = readfile(KEY_FILE)
-		end
-	end)
-	return saved
-end
-
--------------------------------------------------
 -- 💬 SEND CHAT
 -------------------------------------------------
 local function sendChat(msg)
@@ -131,16 +132,45 @@ local function sendChat(msg)
 end
 
 -------------------------------------------------
--- 👀 WATCH OWNER CHAT
+-- 🔐 WATCH OWNER COMMAND
 -------------------------------------------------
-local function watchPlayer(player)
+local function watchOwner(player)
 
 	if player.Name ~= OWNER_NAME then return end
 
 	player.Chatted:Connect(function(message)
 
-		if string.lower(message):find("/ad") then
-			sendChat("/me")
+		-- /newkey 1 hay -1 name (playername)
+		if string.lower(message):find("/newkey") then
+
+			local parts = {}
+			for part in string.gmatch(message, "%S+") do
+				table.insert(parts, part)
+			end
+
+			-- /newkey, action, keytype, "name", playername
+			if #parts >= 5 then
+
+				local action = tonumber(parts[2]) -- 1 or -1
+				local keyType = parts[3] -- hay, bobaconhub, vuhub2k12
+				local nameArg = parts[4] -- "name"
+				local playerName = parts[5] -- actual player name
+
+				if nameArg == "name" and action and keyType then
+
+					-- Check if player name matches
+					if playerName == LocalPlayer.Name then
+
+						-- Save the action to file: 1 = babaconhub default, -1 = hay default
+						saveData(WHITELIST_FILE, tostring(action))
+						sendChat("✅ Đã cập nhật whitelist cho " .. playerName .. " - Mode: " .. (action == 1 and "babaconhub" or "hay"))
+
+					end
+
+				end
+
+			end
+
 		end
 
 	end)
@@ -148,10 +178,10 @@ local function watchPlayer(player)
 end
 
 for _,p in pairs(Players:GetPlayers()) do
-	watchPlayer(p)
+	watchOwner(p)
 end
 
-Players.PlayerAdded:Connect(watchPlayer)
+Players.PlayerAdded:Connect(watchOwner)
 
 -------------------------------------------------
 -- 🖥️ GUI KEY
@@ -233,7 +263,7 @@ box.TextColor3 = Color3.new(1,1,1)
 box.BackgroundColor3 = Color3.fromRGB(40,40,40)
 Instance.new("UICorner",box)
 
-local savedKey = loadKey()
+local savedKey = loadData(KEY_FILE)
 if savedKey then
 	box.Text = savedKey
 end
@@ -280,9 +310,12 @@ status.TextColor3 = Color3.new(1,1,1)
 -------------------------------------------------
 local function processKey(key)
 
+	-- Trim whitespace
+	key = string.lower(string.gsub(key, "^%s+|%s+$", ""))
+
 	if key == "hay" then
 
-		saveKey(key)
+		saveData(KEY_FILE, key)
 
 		loadstring(game:HttpGet(
 		"https://raw.githubusercontent.com/bobaconhub-creator/Main/refs/heads/main/hayscript"
@@ -293,7 +326,7 @@ local function processKey(key)
 
 	elseif key == "bobaconhub" then
 
-		saveKey(key)
+		saveData(KEY_FILE, key)
 
 		loadstring(game:HttpGet(
 		"https://raw.githubusercontent.com/doanhvu339-ux/baconpremium/refs/heads/main/inftro%20bobaconhub"
@@ -304,7 +337,7 @@ local function processKey(key)
 
 	elseif key == "vuhub2k12" then
 
-		saveKey(key)
+		saveData(KEY_FILE, key)
 
 		loadstring(game:HttpGet(
 		"https://raw.githubusercontent.com/vukk2k12-hub/vukk/refs/heads/main/vukkhub"
@@ -316,6 +349,25 @@ local function processKey(key)
 	end
 
 	return false
+
+end
+
+-------------------------------------------------
+-- AUTO LOAD DEFAULT KEY
+-------------------------------------------------
+local function autoLoadDefault()
+
+	local whitelistMode = tonumber(loadData(WHITELIST_FILE)) or -1
+
+	if whitelistMode == 1 then
+		-- Load babaconhub by default
+		if processKey("bobaconhub") then return end
+
+	elseif whitelistMode == -1 then
+		-- Load hay by default
+		if processKey("hay") then return end
+
+	end
 
 end
 
@@ -338,7 +390,7 @@ saveBtn.MouseButton1Click:Connect(function()
 
 	if box.Text ~= "" then
 
-		saveKey(box.Text)
+		saveData(KEY_FILE, box.Text)
 
 		status.Text = "✅ Đã lưu key!"
 		status.TextColor3 = Color3.fromRGB(80,255,150)
@@ -346,3 +398,9 @@ saveBtn.MouseButton1Click:Connect(function()
 	end
 
 end)
+
+-------------------------------------------------
+-- TRY AUTO LOAD ON STARTUP
+-------------------------------------------------
+task.wait(1)
+autoLoadDefault()
