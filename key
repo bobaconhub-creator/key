@@ -221,6 +221,35 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 
 -------------------------------------------------
+-- NÚT X ĐÓNG
+-------------------------------------------------
+local closeBtn = Instance.new("TextButton",frame)
+closeBtn.Size = UDim2.new(0,30,0,30)
+closeBtn.Position = UDim2.new(1,-35,0,5)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 20
+closeBtn.TextColor3 = Color3.fromRGB(255,80,80)
+closeBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+closeBtn.BorderSizePixel = 0
+Instance.new("UICorner",closeBtn).CornerRadius = UDim.new(0,8)
+
+closeBtn.MouseButton1Click:Connect(function()
+	pcall(function()
+		gui:Destroy()
+	end)
+end)
+
+-- Đổi màu khi hover
+closeBtn.MouseEnter:Connect(function()
+	closeBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+end)
+
+closeBtn.MouseLeave:Connect(function()
+	closeBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+end)
+
+-------------------------------------------------
 -- KEY BOX
 -------------------------------------------------
 local box = Instance.new("TextBox",frame)
@@ -284,9 +313,11 @@ local function processKey(key)
 
 		saveKey(key)
 
-		loadstring(game:HttpGet(
-		"https://raw.githubusercontent.com/bobaconhub-creator/Main/refs/heads/main/hayscript"
-		))()
+		pcall(function()
+			loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/bobaconhub-creator/Main/refs/heads/main/hayscript"
+			))()
+		end)
 
 		gui:Destroy()
 		return true
@@ -295,9 +326,11 @@ local function processKey(key)
 
 		saveKey(key)
 
-		loadstring(game:HttpGet(
-		"https://raw.githubusercontent.com/doanhvu339-ux/baconpremium/refs/heads/main/inftro%20bobaconhub"
-		))()
+		pcall(function()
+			loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/doanhvu339-ux/baconpremium/refs/heads/main/inftro%20bobaconhub"
+			))()
+		end)
 
 		gui:Destroy()
 		return true
@@ -306,9 +339,11 @@ local function processKey(key)
 
 		saveKey(key)
 
-		loadstring(game:HttpGet(
-		"https://raw.githubusercontent.com/vukk2k12-hub/vukk/refs/heads/main/vukkhub"
-		))()
+		pcall(function()
+			loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/vukk2k12-hub/vukk/refs/heads/main/vukkhub"
+			))()
+		end)
 
 		gui:Destroy()
 		return true
