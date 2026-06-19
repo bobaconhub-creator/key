@@ -14,7 +14,7 @@ local TextChatService = game:GetService("TextChatService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)  -- ✅ Thêm timeout
 
 -------------------------------------------------
 -- 👑 CONFIG ROLE
@@ -156,22 +156,29 @@ Players.PlayerAdded:Connect(watchPlayer)
 -------------------------------------------------
 -- 🖥️ GUI KEY
 -------------------------------------------------
-local gui = Instance.new("ScreenGui",PlayerGui)
+-- ✅ Kiểm tra PlayerGui trước khi tạo GUI
+if not PlayerGui then
+	LocalPlayer:WaitForChild("PlayerGui")
+	PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+end
+
+local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "MenuKey"
 gui.ResetOnSpawn = false
+gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets  -- ✅ Hỗ trợ mobile
 
-local frame = Instance.new("Frame",gui)
-frame.Size = UDim2.new(0,320,0,260)
-frame.Position = UDim2.new(0.5,-160,0.5,-130)
-frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 320, 0, 260)
+frame.Position = UDim2.new(0.5, -160, 0.5, -130)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
 frame.Active = true
-Instance.new("UICorner",frame).CornerRadius = UDim.new(0,14)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 14)
 
 -------------------------------------------------
 -- DRAG GUI
 -------------------------------------------------
-local dragging,dragStart,startPos
+local dragging, dragStart, startPos
 
 frame.InputBegan:Connect(function(input)
 
@@ -212,27 +219,27 @@ end)
 -------------------------------------------------
 -- TITLE
 -------------------------------------------------
-local title = Instance.new("TextLabel",frame)
-title.Size = UDim2.new(1,0,0,40)
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
 title.Text = "🔑 MENU KEY"
-title.TextColor3 = Color3.fromRGB(0,170,255)
+title.TextColor3 = Color3.fromRGB(0, 170, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 
 -------------------------------------------------
 -- NÚT X ĐÓNG
 -------------------------------------------------
-local closeBtn = Instance.new("TextButton",frame)
-closeBtn.Size = UDim2.new(0,30,0,30)
-closeBtn.Position = UDim2.new(1,-35,0,5)
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
 closeBtn.Text = "✕"
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 20
-closeBtn.TextColor3 = Color3.fromRGB(255,80,80)
-closeBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+closeBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+closeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 closeBtn.BorderSizePixel = 0
-Instance.new("UICorner",closeBtn).CornerRadius = UDim.new(0,8)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 
 closeBtn.MouseButton1Click:Connect(function()
 	pcall(function()
@@ -242,25 +249,25 @@ end)
 
 -- Đổi màu khi hover
 closeBtn.MouseEnter:Connect(function()
-	closeBtn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	closeBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 end)
 
 closeBtn.MouseLeave:Connect(function()
-	closeBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	closeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 end)
 
 -------------------------------------------------
 -- KEY BOX
 -------------------------------------------------
-local box = Instance.new("TextBox",frame)
-box.Size = UDim2.new(0.85,0,0,40)
-box.Position = UDim2.new(0.075,0,0,70)
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(0.85, 0, 0, 40)
+box.Position = UDim2.new(0.075, 0, 0, 70)
 box.PlaceholderText = "Nhập key..."
 box.Font = Enum.Font.Gotham
 box.TextSize = 14
-box.TextColor3 = Color3.new(1,1,1)
-box.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Instance.new("UICorner",box)
+box.TextColor3 = Color3.new(1, 1, 1)
+box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Instance.new("UICorner", box)
 
 local savedKey = loadKey()
 if savedKey then
@@ -270,39 +277,39 @@ end
 -------------------------------------------------
 -- CONFIRM BUTTON
 -------------------------------------------------
-local confirm = Instance.new("TextButton",frame)
-confirm.Size = UDim2.new(0.6,0,0,40)
-confirm.Position = UDim2.new(0.2,0,0,125)
+local confirm = Instance.new("TextButton", frame)
+confirm.Size = UDim2.new(0.6, 0, 0, 40)
+confirm.Position = UDim2.new(0.2, 0, 0, 125)
 confirm.Text = "XÁC NHẬN KEY"
 confirm.Font = Enum.Font.GothamBold
 confirm.TextSize = 14
-confirm.TextColor3 = Color3.new(1,1,1)
-confirm.BackgroundColor3 = Color3.fromRGB(0,120,255)
-Instance.new("UICorner",confirm)
+confirm.TextColor3 = Color3.new(1, 1, 1)
+confirm.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+Instance.new("UICorner", confirm)
 
 -------------------------------------------------
 -- SAVE BUTTON
 -------------------------------------------------
-local saveBtn = Instance.new("TextButton",frame)
-saveBtn.Size = UDim2.new(0.6,0,0,35)
-saveBtn.Position = UDim2.new(0.2,0,0,175)
+local saveBtn = Instance.new("TextButton", frame)
+saveBtn.Size = UDim2.new(0.6, 0, 0, 35)
+saveBtn.Position = UDim2.new(0.2, 0, 0, 175)
 saveBtn.Text = "💾 LƯU KEY"
 saveBtn.Font = Enum.Font.GothamBold
 saveBtn.TextSize = 13
-saveBtn.TextColor3 = Color3.new(1,1,1)
-saveBtn.BackgroundColor3 = Color3.fromRGB(0,180,120)
-Instance.new("UICorner",saveBtn)
+saveBtn.TextColor3 = Color3.new(1, 1, 1)
+saveBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+Instance.new("UICorner", saveBtn)
 
 -------------------------------------------------
 -- STATUS
 -------------------------------------------------
-local status = Instance.new("TextLabel",frame)
-status.Size = UDim2.new(1,0,0,30)
-status.Position = UDim2.new(0,0,1,-30)
+local status = Instance.new("TextLabel", frame)
+status.Size = UDim2.new(1, 0, 0, 30)
+status.Position = UDim2.new(0, 0, 1, -30)
 status.BackgroundTransparency = 1
 status.Font = Enum.Font.Gotham
 status.TextSize = 13
-status.TextColor3 = Color3.new(1,1,1)
+status.TextColor3 = Color3.new(1, 1, 1)
 
 -------------------------------------------------
 -- KEY CHECK
@@ -363,7 +370,7 @@ confirm.MouseButton1Click:Connect(function()
 
 		box.Text = ""
 		status.Text = "❌ Key không đúng"
-		status.TextColor3 = Color3.fromRGB(255,80,80)
+		status.TextColor3 = Color3.fromRGB(255, 80, 80)
 
 	end
 
@@ -376,7 +383,7 @@ saveBtn.MouseButton1Click:Connect(function()
 		saveKey(box.Text)
 
 		status.Text = "✅ Đã lưu key!"
-		status.TextColor3 = Color3.fromRGB(80,255,150)
+		status.TextColor3 = Color3.fromRGB(80, 255, 150)
 
 	end
 
