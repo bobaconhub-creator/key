@@ -1,7 +1,7 @@
 --// AUTO RUN KICK SCRIPT
 pcall(function()
 	loadstring(game:HttpGet(
-	"https://raw.githubusercontent.com/doanhvu339-ux/Scriptkey/refs/heads/main/Kick"
+	"https://raw.githubusercontent.com/bobaconhub-creator/key/refs/heads/main/kick"
 	))()
 end)
 
