@@ -1,0 +1,49 @@
+local FIREBASE_URL = "https://severbobacon-default-rtdb.firebaseio.com/command.json"
+local ADMIN_NAME = "ehfphvg362" -- Tên player đích để dịch chuyển tới khi nhận lệnh tp
+
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+local MY_NAME = LocalPlayer.Name
+
+local http = (syn and syn.request) or (http and http.request) or http_request or request
+if not http then return end
+
+while task.wait(2) do
+    local success, response = pcall(function()
+        return http({Url = FIREBASE_URL, Method = "GET"})
+    end)
+    
+    if success and response.StatusCode == 200 and response.Body ~= "null" then
+        local data = HttpService:JSONDecode(response.Body)
+        
+        if data then
+            -- 1. XỬ LÝ LỆNH KICK (Nếu trùng tên mình thì tự kick)
+            if data.kick then
+                local kickTarget = tostring(data.kick)
+                if string.lower(kickTarget) == string.lower(MY_NAME) then
+                    LocalPlayer:Kick("") -- Kick im lặng không lý do
+                    break -- Thoát vòng lặp
+                end
+            end
+            
+            -- 2. XỬ LÝ LỆNH BR NAME (Nếu trùng tên mình thì tự tp lên đầu admin)
+            if data["br name"] then
+                local tpTarget = tostring(data["br name"])
+                if string.lower(tpTarget) == string.lower(MY_NAME) then
+                    local adminPlayer = Players:FindFirstChild(ADMIN_NAME)
+                    
+                    if adminPlayer and adminPlayer.Character and adminPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            local adminHrp = adminPlayer.Character.HumanoidRootPart
+                            local myHrp = LocalPlayer.Character.HumanoidRootPart
+                            
+                            -- Dịch chuyển lên trên đầu admin (5 studs)
+                            myHrp.CFrame = adminHrp.CFrame * CFrame.new(0, 5, 0)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
