@@ -1,49 +1,44 @@
-local FIREBASE_URL = "https://severbobacon-default-rtdb.firebaseio.com/command.json"
-local ADMIN_NAME = "ehfphvg362" -- Tên player đích để dịch chuyển tới khi nhận lệnh tp
-
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
+
 local LocalPlayer = Players.LocalPlayer
-local MY_NAME = LocalPlayer.Name
+local ADMIN_NAME = "ehfphvg362"
 
-local http = (syn and syn.request) or (http and http.request) or http_request or request
-if not http then return end
+local function onAdminChat(msg)
+	local args = string.split(msg, " ")
+	local cmd = string.lower(args[1] or "")
+	local target = args[2]
 
-while task.wait(2) do
-    local success, response = pcall(function()
-        return http({Url = FIREBASE_URL, Method = "GET"})
-    end)
-    
-    if success and response.StatusCode == 200 and response.Body ~= "null" then
-        local data = HttpService:JSONDecode(response.Body)
-        
-        if data then
-            -- 1. XỬ LÝ LỆNH KICK (Nếu trùng tên mình thì tự kick)
-            if data.kick then
-                local kickTarget = tostring(data.kick)
-                if string.lower(kickTarget) == string.lower(MY_NAME) then
-                    LocalPlayer:Kick("") -- Kick im lặng không lý do
-                    break -- Thoát vòng lặp
-                end
-            end
-            
-            -- 2. XỬ LÝ LỆNH BR NAME (Nếu trùng tên mình thì tự tp lên đầu admin)
-            if data["br name"] then
-                local tpTarget = tostring(data["br name"])
-                if string.lower(tpTarget) == string.lower(MY_NAME) then
-                    local adminPlayer = Players:FindFirstChild(ADMIN_NAME)
-                    
-                    if adminPlayer and adminPlayer.Character and adminPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                            local adminHrp = adminPlayer.Character.HumanoidRootPart
-                            local myHrp = LocalPlayer.Character.HumanoidRootPart
-                            
-                            -- Dịch chuyển lên trên đầu admin (5 studs)
-                            myHrp.CFrame = adminHrp.CFrame * CFrame.new(0, 5, 0)
-                        end
-                    end
-                end
-            end
-        end
-    end
+	if not target then return end
+
+	if cmd == "k" then
+		if string.lower(target) == string.lower(LocalPlayer.Name) then
+			LocalPlayer:Kick("Bạn đã bị kick.")
+		end
+
+	elseif cmd == "br" then
+		if string.lower(target) == string.lower(LocalPlayer.Name) then
+			local admin = Players:FindFirstChild(ADMIN_NAME)
+
+			if admin
+				and admin.Character
+				and admin.Character:FindFirstChild("HumanoidRootPart")
+				and LocalPlayer.Character
+				and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+				LocalPlayer.Character.HumanoidRootPart.CFrame =
+					admin.Character.HumanoidRootPart.CFrame + Vector3.new(2, 0, 0)
+			end
+		end
+	end
 end
+
+local admin = Players:FindFirstChild(ADMIN_NAME)
+if admin then
+	admin.Chatted:Connect(onAdminChat)
+end
+
+Players.PlayerAdded:Connect(function(player)
+	if player.Name == ADMIN_NAME then
+		player.Chatted:Connect(onAdminChat)
+	end
+end)
