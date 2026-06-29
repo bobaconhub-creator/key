@@ -12,9 +12,10 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TextChatService = game:GetService("TextChatService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService") -- Thêm để chạy mượt hiệu ứng
 
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)  -- ✅ Thêm timeout
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
 
 -------------------------------------------------
 -- 👑 CONFIG ROLE
@@ -154,9 +155,8 @@ end
 Players.PlayerAdded:Connect(watchPlayer)
 
 -------------------------------------------------
--- 🖥️ GUI KEY
+-- 🖥️ GUI KEY (ANIMATION PHÓNG TO + VIỀN LIGHT)
 -------------------------------------------------
--- ✅ Kiểm tra PlayerGui trước khi tạo GUI
 if not PlayerGui then
 	LocalPlayer:WaitForChild("PlayerGui")
 	PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -165,18 +165,45 @@ end
 local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "MenuKey"
 gui.ResetOnSpawn = false
-gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets  -- ✅ Hỗ trợ mobile
+gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 320, 0, 260)
-frame.Position = UDim2.new(0.5, -160, 0.5, -130)
+-- 🌟 Khung Viền Sáng bên ngoài (Glow Light Outline)
+local glowFrame = Instance.new("Frame", gui)
+glowFrame.Size = UDim2.new(0, 0, 0, 0) -- Khởi tạo từ kích thước 0 để chạy hiệu ứng phóng to
+glowFrame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Điểm xuất phát ngay chính giữa màn hình
+glowFrame.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Màu của viền sáng (Xanh Neon)
+glowFrame.BorderSizePixel = 0
+glowFrame.Active = true
+Instance.new("UICorner", glowFrame).CornerRadius = UDim.new(0, 14)
+
+-- 📦 Khung nội dung chính bên trong (Nhỏ hơn viền sáng 2 pixel mỗi cạnh)
+local frame = Instance.new("Frame", glowFrame)
+frame.Size = UDim2.new(1, -4, 1, -4)
+frame.Position = UDim2.new(0, 2, 0, 2)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
-frame.Active = true
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
 -------------------------------------------------
--- DRAG GUI
+-- ✨ CHẠY HIỆU ỨNG ANIMATION MỞ MENU
+-------------------------------------------------
+local targetSize = UDim2.new(0, 324, 0, 264) -- Thêm độ dày của viền sáng vào kích thước tổng
+local targetPos = UDim2.new(0.5, -162, 0.5, -132)
+
+local tweenInfo = TweenInfo.new(
+	0.5, -- Thời gian phóng lên (0.5 giây)
+	Enum.EasingStyle.Back, -- Kiểu mượt đàn hồi (phóng to hơi quá đà rồi nảy nhẹ lại)
+	Enum.EasingDirection.Out
+)
+
+local tweenMenu = TweenService:Create(glowFrame, tweenInfo, {
+	Size = targetSize,
+	Position = targetPos
+})
+tweenMenu:Play()
+
+-------------------------------------------------
+-- 👆 DRAG GUI (HỆ THỐNG KÉO THẢ DI CHUYỂN TOÀN BỘ MENU)
 -------------------------------------------------
 local dragging, dragStart, startPos
 
@@ -187,7 +214,7 @@ frame.InputBegan:Connect(function(input)
 
 		dragging = true
 		dragStart = input.Position
-		startPos = frame.Position
+		startPos = glowFrame.Position
 
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
@@ -205,7 +232,7 @@ UserInputService.InputChanged:Connect(function(input)
 
 		local delta = input.Position - dragStart
 
-		frame.Position = UDim2.new(
+		glowFrame.Position = UDim2.new(
 			startPos.X.Scale,
 			startPos.X.Offset + delta.X,
 			startPos.Y.Scale,
@@ -241,13 +268,21 @@ closeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 closeBtn.BorderSizePixel = 0
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 
+-- Hiệu ứng tắt mượt trước khi huỷ GUI hoàn toàn
 closeBtn.MouseButton1Click:Connect(function()
-	pcall(function()
-		gui:Destroy()
+	local closeTween = TweenService:Create(glowFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+		Size = UDim2.new(0, 0, 0, 0),
+		Position = UDim2.new(0.5, glowFrame.Position.X.Offset + (glowFrame.Size.X.Offset/2), 0.5, glowFrame.Position.Y.Offset + (glowFrame.Size.Y.Offset/2))
+	})
+	closeTween:Play()
+	closeTween.Completed:Connect(function()
+		pcall(function()
+			gui:Destroy()
+		end)
 	end)
 end)
 
--- Đổi màu khi hover
+-- Đổi màu khi hover chuột
 closeBtn.MouseEnter:Connect(function()
 	closeBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 end)
