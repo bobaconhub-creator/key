@@ -364,7 +364,7 @@ local function processKey(key)
 		gui:Destroy()
 		return true
 
-	elseif key == "backhub00" then
+	elseif key == "blackhub" then
 
 		saveKey(key)
 
@@ -377,7 +377,7 @@ local function processKey(key)
 		gui:Destroy()
 		return true
 
-	elseif key == "vuhub2k12" then
+	elseif key == "vu2k12" then
 
 		saveKey(key)
 
