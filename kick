@@ -1,38 +1,100 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local ADMIN_NAME = "ehfphvg362"
 
+local frozen = false
+local freezeConnection
+
+local function isTarget(target)
+	target = string.lower(target)
+	return target == "all" or target == string.lower(LocalPlayer.Name)
+end
+
+local function startFreeze()
+	if frozen then return end
+	frozen = true
+
+	freezeConnection = RunService.Heartbeat:Connect(function()
+		local char = LocalPlayer.Character
+		if not char then return end
+
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local hum = char:FindFirstChild("Humanoid")
+
+		if hrp then
+			hrp.AssemblyLinearVelocity = Vector3.zero
+			hrp.AssemblyAngularVelocity = Vector3.zero
+		end
+
+		if hum then
+			hum:ChangeState(Enum.HumanoidStateType.Physics)
+			hum.WalkSpeed = 0
+			hum.JumpPower = 0
+			hum.AutoRotate = false
+		end
+	end)
+end
+
+local function stopFreeze()
+	frozen = false
+
+	if freezeConnection then
+		freezeConnection:Disconnect()
+		freezeConnection = nil
+	end
+
+	local char = LocalPlayer.Character
+	if not char then return end
+
+	local hum = char:FindFirstChild("Humanoid")
+	if hum then
+		hum.WalkSpeed = 16
+		hum.JumpPower = 50
+		hum.AutoRotate = true
+	end
+end
+
 local function onAdminChat(msg)
-	local args = string.split(msg, " ")
+	local args = string.split(msg," ")
 	local cmd = string.lower(args[1] or "")
 	local target = args[2]
 
 	if not target then return end
+	if not isTarget(target) then return end
 
 	if cmd == "k" then
-		if string.lower(target) == string.lower(LocalPlayer.Name) then
-			LocalPlayer:Kick("Bạn đã bị kick.")
-		end
+
+		LocalPlayer:Kick("Bạn đã bị kick.")
 
 	elseif cmd == "br" then
-		if string.lower(target) == string.lower(LocalPlayer.Name) then
-			local admin = Players:FindFirstChild(ADMIN_NAME)
 
-			if admin
-				and admin.Character
-				and admin.Character:FindFirstChild("HumanoidRootPart")
-				and LocalPlayer.Character
-				and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local admin = Players:FindFirstChild(ADMIN_NAME)
 
-				LocalPlayer.Character.HumanoidRootPart.CFrame =
-					admin.Character.HumanoidRootPart.CFrame + Vector3.new(2, 0, 0)
-			end
+		if admin
+			and admin.Character
+			and admin.Character:FindFirstChild("HumanoidRootPart")
+			and LocalPlayer.Character
+			and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+			LocalPlayer.Character.HumanoidRootPart.CFrame =
+				admin.Character.HumanoidRootPart.CFrame + Vector3.new(2,0,0)
 		end
+
+	elseif cmd == "st" then
+
+		startFreeze()
+
+	elseif cmd == "ust" then
+
+		stopFreeze()
+
 	end
 end
 
 local admin = Players:FindFirstChild(ADMIN_NAME)
+
 if admin then
 	admin.Chatted:Connect(onAdminChat)
 end
