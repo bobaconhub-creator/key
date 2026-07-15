@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
-local ADMIN_NAME = "ehfphvg362"
+local ADMIN_NAME = "vu2k12hub"
 
 local frozen = false
 local freezeConnection
